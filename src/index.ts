@@ -33,7 +33,7 @@ class NatureRemoFan implements AccessoryPlugin {
   private readonly log: Logging;
   private readonly name: string;
   private readonly config: { access_token: any; appliance_id: any; };
-  private switchOn = false;
+  private swicthActive = false;
   private rotationSpeed = 0;
   private signals: {
     off: any;
@@ -61,12 +61,12 @@ class NatureRemoFan implements AccessoryPlugin {
     }
 
     // create a new Fan service
-    this.fanService = new hap.Service.Fan(this.name);
+    this.fanService = new hap.Service.Fanv2(this.name);
 
     // create handlers for required characteristics
-    this.fanService.getCharacteristic(hap.Characteristic.On)
-      .on(CharacteristicEventTypes.GET, this.handleOnGet.bind(this))
-      .on(CharacteristicEventTypes.SET, this.handleOnSet.bind(this));
+    this.fanService.getCharacteristic(hap.Characteristic.Active)
+      .on(CharacteristicEventTypes.GET, this.handleActiveGet.bind(this))
+      .on(CharacteristicEventTypes.SET, this.handleActiveSet.bind(this));
 
     this.fanService.getCharacteristic(hap.Characteristic.RotationSpeed)
       .on(CharacteristicEventTypes.GET, this.handleRotationSpeedGet.bind(this))
@@ -82,20 +82,20 @@ class NatureRemoFan implements AccessoryPlugin {
   }
 
   /**
-   * Handle requests to get the current value of the "On" characteristic
+   * Handle requests to get the current value of the "Active" characteristic
    */
-  handleOnGet(callback: CharacteristicGetCallback) {
-    this.log.debug("Current state of the switch was returned: " + (this.switchOn ? "ON" : "OFF"));
-    callback(undefined, this.switchOn);
+  handleActiveGet(callback: CharacteristicGetCallback) {
+    this.log.debug("Current state of the switch was returned: " + (this.swicthActive ? "Active" : "Inactive"));
+    callback(undefined, this.swicthActive);
   }
 
   /**
-   * Handle requests to set the "On" characteristic
+   * Handle requests to set the "Active" characteristic
    */
-  handleOnSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-    this.switchOn = value as boolean;
-    this.log.debug("Switch state was set to: " + (this.switchOn ? "ON" : "OFF"));
-    this._sendSignal(this.switchOn ? this.signals.on : this.signals.off);
+  handleActiveSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    this.swicthActive = value as boolean;
+    this.log.debug("Switch state was set to: " + (this.swicthActive ? "ON" : "OFF"));
+    this._sendSignal(this.swicthActive ? this.signals.on : this.signals.off);
     callback();
   }
 
