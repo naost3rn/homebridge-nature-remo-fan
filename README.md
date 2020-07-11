@@ -3,6 +3,7 @@ Homebridge Plug-in for Fan Managed by Nature Remo
 
 ## Features
 * Switch on / off.
+* Adjust rotation speed.
 
 ## configuration
 **Example**
