@@ -35,12 +35,14 @@ class NatureRemoFan implements AccessoryPlugin {
   private readonly config: { access_token: any; appliance_id: any; };
   private swicthActive = false;
   private rotationSpeed = 0;
+  private swingMode = 0;
   private signals: {
     off: any;
     on: any;
     low: any;
     medium: any;
     high: any;
+    swing: any;
   }
 
   private readonly fanService: Service;
@@ -57,7 +59,8 @@ class NatureRemoFan implements AccessoryPlugin {
       on: null,
       low: null,
       medium: null,
-      high: null
+      high: null,
+      swing: null
     }
 
     // create a new Fan service
@@ -71,6 +74,10 @@ class NatureRemoFan implements AccessoryPlugin {
     this.fanService.getCharacteristic(hap.Characteristic.RotationSpeed)
       .on(CharacteristicEventTypes.GET, this.handleRotationSpeedGet.bind(this))
       .on(CharacteristicEventTypes.SET, this.handleRotationSpeedSet.bind(this));
+
+    this.fanService.getCharacteristic(hap.Characteristic.SwingMode)
+      .on(CharacteristicEventTypes.GET, this.handleSwingModeGet.bind(this))
+      .on(CharacteristicEventTypes.SET, this.handleSwingModeSet.bind(this));
 
     this.setup();
 
@@ -131,6 +138,24 @@ class NatureRemoFan implements AccessoryPlugin {
     callback()
   }
 
+  /**
+   * Handle requests to get the current value of the "SwingMode" characteristic
+   */
+  handleSwingModeGet(callback: CharacteristicGetCallback) {
+    this.log.debug("Current state of the swing mode: " + (this.swingMode ? "ON" : "OFF"));
+    callback(undefined, this.swingMode)
+  }
+
+  /**
+   * Handle requests to set the "SwingMode" characteristic
+   */
+  handleSwingModeSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    this.swingMode = value as number;
+    this.log.debug("Swing mode state was set to: " + (this.swingMode ? "ON" : "OFF"));
+    this._sendSignal(this.signals.swing);
+    callback()
+  }
+
   identify(): void {
     this.log("Identify!");
   }
@@ -160,18 +185,22 @@ class NatureRemoFan implements AccessoryPlugin {
         this.signals.off = offSignal.id;
         const onSignal = js.find((v: NatureRemoSignal) => v.image === 'ico_on');
         this.signals.on = onSignal.id;
-	const lowSignal = js.find((v: NatureRemoSignal) => v.image === 'ico_number_1');
-	this.signals.low = lowSignal.id;
-	const mediumSignal = js.find((v: NatureRemoSignal) => v.image === 'ico_number_2');
-	this.signals.medium = mediumSignal.id;
-	const highSignal = js.find((v: NatureRemoSignal) => v.image === 'ico_number_3');
-	this.signals.high = highSignal.id;
+        const lowSignal = js.find((v: NatureRemoSignal) => v.image === 'ico_number_1');
+        this.signals.low = lowSignal.id;
+        const mediumSignal = js.find((v: NatureRemoSignal) => v.image === 'ico_number_2');
+        this.signals.medium = mediumSignal.id;
+        const highSignal = js.find((v: NatureRemoSignal) => v.image === 'ico_number_3');
+        this.signals.high = highSignal.id;
+        const swing = js.find((v: NatureRemoSignal) => v.name === 'Swing');
+        this.signals.swing = swing.id;
+
 
         this.log.debug(`off signal id :${this.signals.off}`)
         this.log.debug(`on signal id :${this.signals.on}`)
         this.log.debug(`low signal id :${this.signals.low}`)
         this.log.debug(`medium signal id :${this.signals.medium}`)
         this.log.debug(`high signal id :${this.signals.high}`)
+        this.log.debug(`swing signal id :${this.signals.swing}`)
       } catch (error) {
         this.log.error(error.response.body);
         return;
