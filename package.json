@@ -1,6 +1,6 @@
 {
   "name": "homebridge-nature-remo-fan",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Homebridge Plug-in for Fan Managed by Nature Remo",
   "main": "dist/index.js",
   "scripts": {
